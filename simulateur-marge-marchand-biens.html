@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulateur de Marge - Marchand de Biens</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .slider-group {
+            margin-bottom: 25px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .slider-value {
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: #764ba2;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.2);
+            background: #764ba2;
+        }
+
+        .results {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .result-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .result-highlight {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .result-highlight .result-label {
+            font-size: 1.3em;
+            color: #764ba2;
+        }
+
+        .result-highlight .result-value {
+            font-size: 2em;
+            color: #764ba2;
+        }
+
+        .profit-indicator {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .profit-positive {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .profit-negative {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .profit-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .result-value {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💼 Simulateur de Marge</h1>
+            <p>Marchand de Biens - Calculez votre rentabilité</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <div class="section-title">🏠 Prix d'Acquisition</div>
+                
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Prix d'achat du bien</span>
+                        <span class="slider-value" id="prixAchatValue">200 000 €</span>
+                    </div>
+                    <input type="range" id="prixAchat" min="20000" max="1000000" step="1000" value="200000">
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Frais de notaire (%)</span>
+                        <span class="slider-value" id="fraisNotaireValue">8.0 %</span>
+                    </div>
+                    <input type="range" id="fraisNotaire" min="2" max="10" step="0.1" value="8">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">🔨 Travaux et Frais</div>
+                
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Montant des travaux</span>
+                        <span class="slider-value" id="travauxValue">50 000 €</span>
+                    </div>
+                    <input type="range" id="travaux" min="0" max="200000" step="1000" value="50000">
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Frais de portage (mois)</span>
+                        <span class="slider-value" id="dureePortageValue">6 mois</span>
+                    </div>
+                    <input type="range" id="dureePortage" min="1" max="24" step="1" value="6">
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Frais mensuels (crédit, assurances, taxes...)</span>
+                        <span class="slider-value" id="fraisMensuelValue">1 000 €/mois</span>
+                    </div>
+                    <input type="range" id="fraisMensuel" min="0" max="5000" step="100" value="1000">
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Autres frais (diagnostics, etc.)</span>
+                        <span class="slider-value" id="autresFraisValue">2 000 €</span>
+                    </div>
+                    <input type="range" id="autresFrais" min="0" max="20000" step="500" value="2000">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">💰 Prix de Revente</div>
+                
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Prix de vente estimé</span>
+                        <span class="slider-value" id="prixVenteValue">300 000 €</span>
+                    </div>
+                    <input type="range" id="prixVente" min="20000" max="1500000" step="1000" value="300000">
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Frais d'agence vente (%)</span>
+                        <span class="slider-value" id="fraisAgenceVenteValue">3.0 %</span>
+                    </div>
+                    <input type="range" id="fraisAgenceVente" min="0" max="10" step="0.5" value="3">
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Impôts sur la plus-value (%)</span>
+                        <span class="slider-value" id="impotsPVValue">36.2 %</span>
+                    </div>
+                    <input type="range" id="impotsPV" min="0" max="50" step="0.1" value="36.2">
+                </div>
+            </div>
+
+            <div class="results">
+                <div class="section-title">📊 Résultats de l'Opération</div>
+                
+                <div class="result-item">
+                    <span class="result-label">Investissement total</span>
+                    <span class="result-value" id="investissementTotal">0 €</span>
+                </div>
+
+                <div class="result-item">
+                    <span class="result-label">Prix de vente net</span>
+                    <span class="result-value" id="prixVenteNet">0 €</span>
+                </div>
+
+                <div class="result-item">
+                    <span class="result-label">Plus-value brute</span>
+                    <span class="result-value" id="plusValueBrute">0 €</span>
+                </div>
+
+                <div class="result-item">
+                    <span class="result-label">Impôts sur plus-value</span>
+                    <span class="result-value" id="montantImpots">0 €</span>
+                </div>
+
+                <div class="result-highlight">
+                    <div class="result-item">
+                        <span class="result-label">💎 Bénéfice net</span>
+                        <span class="result-value" id="beneficeNet">0 €</span>
+                    </div>
+                </div>
+
+                <div class="result-item">
+                    <span class="result-label">Rentabilité (%)</span>
+                    <span class="result-value" id="rentabilite">0 %</span>
+                </div>
+
+                <div id="profitIndicator" class="profit-indicator"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function formatEuro(value) {
+            return new Intl.NumberFormat('fr-FR', {
+                style: 'currency',
+                currency: 'EUR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        }
+
+        function formatPercent(value) {
+            return value.toFixed(1) + ' %';
+        }
+
+        function calculate() {
+            // Récupération des valeurs
+            const prixAchat = parseFloat(document.getElementById('prixAchat').value);
+            const fraisNotaire = parseFloat(document.getElementById('fraisNotaire').value) / 100;
+            const travaux = parseFloat(document.getElementById('travaux').value);
+            const dureePortage = parseInt(document.getElementById('dureePortage').value);
+            const fraisMensuel = parseFloat(document.getElementById('fraisMensuel').value);
+            const autresFrais = parseFloat(document.getElementById('autresFrais').value);
+            const prixVente = parseFloat(document.getElementById('prixVente').value);
+            const fraisAgenceVente = parseFloat(document.getElementById('fraisAgenceVente').value) / 100;
+            const impotsPV = parseFloat(document.getElementById('impotsPV').value) / 100;
+
+            // Calculs
+            const montantFraisNotaire = prixAchat * fraisNotaire;
+            const fraisPortage = fraisMensuel * dureePortage;
+            const investissementTotal = prixAchat + montantFraisNotaire + travaux + fraisPortage + autresFrais;
+
+            const montantFraisAgenceVente = prixVente * fraisAgenceVente;
+            const prixVenteNet = prixVente - montantFraisAgenceVente;
+
+            const plusValueBrute = prixVenteNet - investissementTotal;
+            const montantImpots = plusValueBrute > 0 ? plusValueBrute * impotsPV : 0;
+            const beneficeNet = plusValueBrute - montantImpots;
+            const rentabilite = (beneficeNet / investissementTotal) * 100;
+
+            // Affichage des résultats
+            document.getElementById('investissementTotal').textContent = formatEuro(investissementTotal);
+            document.getElementById('prixVenteNet').textContent = formatEuro(prixVenteNet);
+            document.getElementById('plusValueBrute').textContent = formatEuro(plusValueBrute);
+            document.getElementById('montantImpots').textContent = formatEuro(montantImpots);
+            document.getElementById('beneficeNet').textContent = formatEuro(beneficeNet);
+            document.getElementById('rentabilite').textContent = formatPercent(rentabilite);
+
+            // Indicateur de profit
+            const indicator = document.getElementById('profitIndicator');
+            if (beneficeNet > 0) {
+                if (rentabilite > 15) {
+                    indicator.className = 'profit-indicator profit-positive';
+                    indicator.textContent = '✅ Excellente opération ! Rentabilité très attractive.';
+                } else if (rentabilite > 8) {
+                    indicator.className = 'profit-indicator profit-positive';
+                    indicator.textContent = '✅ Bonne opération. Rentabilité intéressante.';
+                } else {
+                    indicator.className = 'profit-indicator profit-warning';
+                    indicator.textContent = '⚠️ Opération rentable mais rentabilité faible.';
+                }
+            } else {
+                indicator.className = 'profit-indicator profit-negative';
+                indicator.textContent = '❌ Attention ! Cette opération génère une perte.';
+            }
+        }
+
+        // Mise à jour des affichages des sliders
+        function updateSliderDisplay(sliderId, valueId, formatter) {
+            const slider = document.getElementById(sliderId);
+            const valueDisplay = document.getElementById(valueId);
+            
+            slider.addEventListener('input', function() {
+                let value = this.value;
+                if (formatter === 'euro') {
+                    valueDisplay.textContent = formatEuro(value);
+                } else if (formatter === 'percent') {
+                    valueDisplay.textContent = parseFloat(value).toFixed(1) + ' %';
+                } else if (formatter === 'mois') {
+                    valueDisplay.textContent = value + ' mois';
+                } else if (formatter === 'euroMois') {
+                    valueDisplay.textContent = formatEuro(value) + '/mois';
+                }
+                calculate();
+            });
+        }
+
+        // Initialisation des événements
+        updateSliderDisplay('prixAchat', 'prixAchatValue', 'euro');
+        updateSliderDisplay('fraisNotaire', 'fraisNotaireValue', 'percent');
+        updateSliderDisplay('travaux', 'travauxValue', 'euro');
+        updateSliderDisplay('dureePortage', 'dureePortageValue', 'mois');
+        updateSliderDisplay('fraisMensuel', 'fraisMensuelValue', 'euroMois');
+        updateSliderDisplay('autresFrais', 'autresFraisValue', 'euro');
+        updateSliderDisplay('prixVente', 'prixVenteValue', 'euro');
+        updateSliderDisplay('fraisAgenceVente', 'fraisAgenceVenteValue', 'percent');
+        updateSliderDisplay('impotsPV', 'impotsPVValue', 'percent');
+
+        // Calcul initial
+        calculate();
+    </script>
+</body>
+</html>
