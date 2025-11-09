@@ -3,439 +3,611 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulateur de Marge - Marchand de Biens</title>
+    <title>Veille des ventes aux enchères - Nouvelle-Aquitaine</title>
     <style>
+        :root {
+            color-scheme: only dark;
+            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+        }
+
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            background: #0d0d0d;
+            color: #f7f7f7;
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .app {
+            width: min(1080px, 100%);
+            border: 1px solid #222;
+            background: #111;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        header {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        header h1 {
+            font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        header p {
+            max-width: 760px;
+            line-height: 1.5;
+            color: #d8d8d8;
+        }
+
+        .filters {
+            display: grid;
+            gap: 18px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             padding: 20px;
+            border: 1px solid #1f1f1f;
+            background: #151515;
         }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
+        label {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #bdbdbd;
+            letter-spacing: 0.05em;
         }
 
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
+        input, select {
+            background: #0b0b0b;
+            border: 1px solid #292929;
+            padding: 10px;
+            color: #f6f6f6;
+            font-size: 0.95rem;
+            letter-spacing: 0.03em;
         }
 
-        .header h1 {
-            font-size: 2em;
-            margin-bottom: 10px;
+        input:focus, select:focus {
+            outline: 2px solid #f6f6f6;
+            outline-offset: 0;
         }
 
-        .header p {
-            opacity: 0.9;
-            font-size: 1.1em;
-        }
-
-        .content {
-            padding: 40px;
-        }
-
-        .section {
-            margin-bottom: 40px;
-        }
-
-        .section-title {
-            font-size: 1.3em;
-            color: #667eea;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
-        }
-
-        .slider-group {
-            margin-bottom: 25px;
-        }
-
-        .slider-label {
+        .results-meta {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 10px;
-            font-weight: 600;
-            color: #333;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            color: #cfcfcf;
+            letter-spacing: 0.04em;
         }
 
-        .slider-value {
-            color: #667eea;
-            font-size: 1.1em;
+        .results-meta span {
+            white-space: nowrap;
         }
 
-        input[type="range"] {
-            width: 100%;
-            height: 8px;
-            border-radius: 5px;
-            background: #e0e0e0;
-            outline: none;
-            -webkit-appearance: none;
+        .cards {
+            display: grid;
+            gap: 18px;
         }
 
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #667eea;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
-            transition: all 0.3s;
-        }
-
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-            background: #764ba2;
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #667eea;
-            cursor: pointer;
-            border: none;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
-            transition: all 0.3s;
-        }
-
-        input[type="range"]::-moz-range-thumb:hover {
-            transform: scale(1.2);
-            background: #764ba2;
-        }
-
-        .results {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding: 30px;
-            border-radius: 15px;
-            margin-top: 30px;
-        }
-
-        .result-item {
+        article {
+            border: 1px solid #222;
+            background: #121212;
+            padding: 24px;
             display: flex;
-            justify-content: space-between;
-            padding: 15px 0;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
+            flex-direction: column;
+            gap: 18px;
         }
 
-        .result-item:last-child {
-            border-bottom: none;
+        article header {
+            flex-direction: column;
+            gap: 6px;
         }
 
-        .result-label {
-            font-weight: 600;
-            color: #333;
+        .audience-date {
+            font-size: 1.1rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
         }
 
-        .result-value {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #667eea;
+        .location {
+            font-size: 0.95rem;
+            color: #bcbcbc;
+            letter-spacing: 0.04em;
         }
 
-        .result-highlight {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
-        .result-highlight .result-label {
-            font-size: 1.3em;
-            color: #764ba2;
+        .tag {
+            border: 1px solid #f6f6f6;
+            color: #f6f6f6;
+            padding: 4px 10px;
+            font-size: 0.7rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
         }
 
-        .result-highlight .result-value {
-            font-size: 2em;
-            color: #764ba2;
+        .grid {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
         }
 
-        .profit-indicator {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 10px;
+        .grid strong {
+            letter-spacing: 0.04em;
+            font-size: 0.8rem;
+            color: #b6b6b6;
+        }
+
+        .grid span {
+            font-size: 0.95rem;
+            color: #f7f7f7;
+            letter-spacing: 0.02em;
+        }
+
+        .comparables {
+            border-top: 1px solid #1f1f1f;
+            padding-top: 16px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .comparables h3 {
+            letter-spacing: 0.08em;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .comparables ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 8px;
+        }
+
+        .comparables li {
+            font-size: 0.9rem;
+            color: #dcdcdc;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .empty-state {
             text-align: center;
-            font-weight: bold;
-            font-size: 1.1em;
+            padding: 48px 24px;
+            border: 1px solid #1f1f1f;
+            background: #141414;
+            letter-spacing: 0.05em;
         }
 
-        .profit-positive {
-            background: #d4edda;
-            color: #155724;
-        }
+        @media (max-width: 640px) {
+            body {
+                padding: 16px;
+            }
 
-        .profit-negative {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .profit-warning {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        @media (max-width: 768px) {
-            .content {
+            .app {
                 padding: 20px;
-            }
-
-            .header h1 {
-                font-size: 1.5em;
-            }
-
-            .result-value {
-                font-size: 1em;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>💼 Simulateur de Marge</h1>
-            <p>Marchand de Biens - Calculez votre rentabilité</p>
+    <div class="app">
+        <header>
+            <h1>Veille Enchères Maisons — Nouvelle-Aquitaine</h1>
+            <p>Interface minimaliste pour recenser les maisons, domaines, villas ou immeubles occupés par leurs propriétaires et annoncés en ventes aux enchères judiciaires sur l'ensemble de la Nouvelle-Aquitaine. Les audiences passées sont automatiquement écartées et chaque fiche est rapprochée d'annonces comparables repérées sur Leboncoin.</p>
+        </header>
+
+        <section class="filters">
+            <label>
+                Département
+                <select id="filtreDepartement">
+                    <option value="">Tous</option>
+                </select>
+            </label>
+            <label>
+                Type de bien
+                <select id="filtreType">
+                    <option value="">Tous</option>
+                    <option value="Maison">Maison</option>
+                    <option value="Villa">Villa</option>
+                    <option value="Domaine">Domaine</option>
+                    <option value="Immeuble">Immeuble</option>
+                </select>
+            </label>
+            <label>
+                Tribunal
+                <select id="filtreTribunal">
+                    <option value="">Tous</option>
+                </select>
+            </label>
+            <label>
+                Mots-clés (ville, avocat…)
+                <input id="filtreRecherche" type="search" placeholder="Rechercher">
+            </label>
+            <label>
+                Audience à partir du
+                <input id="filtreDate" type="date">
+            </label>
+        </section>
+
+        <div class="results-meta">
+            <span id="compteur">0 résultats</span>
+            <span id="miseAJour"></span>
         </div>
 
-        <div class="content">
-            <div class="section">
-                <div class="section-title">🏠 Prix d'Acquisition</div>
-                
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>Prix d'achat du bien</span>
-                        <span class="slider-value" id="prixAchatValue">200 000 €</span>
-                    </div>
-                    <input type="range" id="prixAchat" min="20000" max="1000000" step="1000" value="200000">
-                </div>
-
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>Frais de notaire (%)</span>
-                        <span class="slider-value" id="fraisNotaireValue">8.0 %</span>
-                    </div>
-                    <input type="range" id="fraisNotaire" min="2" max="10" step="0.1" value="8">
-                </div>
-            </div>
-
-            <div class="section">
-                <div class="section-title">🔨 Travaux et Frais</div>
-                
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>Montant des travaux</span>
-                        <span class="slider-value" id="travauxValue">50 000 €</span>
-                    </div>
-                    <input type="range" id="travaux" min="0" max="200000" step="1000" value="50000">
-                </div>
-
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>Frais de portage (mois)</span>
-                        <span class="slider-value" id="dureePortageValue">6 mois</span>
-                    </div>
-                    <input type="range" id="dureePortage" min="1" max="24" step="1" value="6">
-                </div>
-
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>Frais mensuels (crédit, assurances, taxes...)</span>
-                        <span class="slider-value" id="fraisMensuelValue">1 000 €/mois</span>
-                    </div>
-                    <input type="range" id="fraisMensuel" min="0" max="5000" step="100" value="1000">
-                </div>
-
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>Autres frais (diagnostics, etc.)</span>
-                        <span class="slider-value" id="autresFraisValue">2 000 €</span>
-                    </div>
-                    <input type="range" id="autresFrais" min="0" max="20000" step="500" value="2000">
-                </div>
-            </div>
-
-            <div class="section">
-                <div class="section-title">💰 Prix de Revente</div>
-                
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>Prix de vente estimé</span>
-                        <span class="slider-value" id="prixVenteValue">300 000 €</span>
-                    </div>
-                    <input type="range" id="prixVente" min="20000" max="1500000" step="1000" value="300000">
-                </div>
-
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>Frais d'agence vente (%)</span>
-                        <span class="slider-value" id="fraisAgenceVenteValue">3.0 %</span>
-                    </div>
-                    <input type="range" id="fraisAgenceVente" min="0" max="10" step="0.5" value="3">
-                </div>
-
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>Impôts sur la plus-value (%)</span>
-                        <span class="slider-value" id="impotsPVValue">36.2 %</span>
-                    </div>
-                    <input type="range" id="impotsPV" min="0" max="50" step="0.1" value="36.2">
-                </div>
-            </div>
-
-            <div class="results">
-                <div class="section-title">📊 Résultats de l'Opération</div>
-                
-                <div class="result-item">
-                    <span class="result-label">Investissement total</span>
-                    <span class="result-value" id="investissementTotal">0 €</span>
-                </div>
-
-                <div class="result-item">
-                    <span class="result-label">Prix de vente net</span>
-                    <span class="result-value" id="prixVenteNet">0 €</span>
-                </div>
-
-                <div class="result-item">
-                    <span class="result-label">Plus-value brute</span>
-                    <span class="result-value" id="plusValueBrute">0 €</span>
-                </div>
-
-                <div class="result-item">
-                    <span class="result-label">Impôts sur plus-value</span>
-                    <span class="result-value" id="montantImpots">0 €</span>
-                </div>
-
-                <div class="result-highlight">
-                    <div class="result-item">
-                        <span class="result-label">💎 Bénéfice net</span>
-                        <span class="result-value" id="beneficeNet">0 €</span>
-                    </div>
-                </div>
-
-                <div class="result-item">
-                    <span class="result-label">Rentabilité (%)</span>
-                    <span class="result-value" id="rentabilite">0 %</span>
-                </div>
-
-                <div id="profitIndicator" class="profit-indicator"></div>
-            </div>
-        </div>
+        <section id="resultats" class="cards" aria-live="polite"></section>
     </div>
 
     <script>
-        function formatEuro(value) {
-            return new Intl.NumberFormat('fr-FR', {
-                style: 'currency',
-                currency: 'EUR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(value);
-        }
-
-        function formatPercent(value) {
-            return value.toFixed(1) + ' %';
-        }
-
-        function calculate() {
-            // Récupération des valeurs
-            const prixAchat = parseFloat(document.getElementById('prixAchat').value);
-            const fraisNotaire = parseFloat(document.getElementById('fraisNotaire').value) / 100;
-            const travaux = parseFloat(document.getElementById('travaux').value);
-            const dureePortage = parseInt(document.getElementById('dureePortage').value);
-            const fraisMensuel = parseFloat(document.getElementById('fraisMensuel').value);
-            const autresFrais = parseFloat(document.getElementById('autresFrais').value);
-            const prixVente = parseFloat(document.getElementById('prixVente').value);
-            const fraisAgenceVente = parseFloat(document.getElementById('fraisAgenceVente').value) / 100;
-            const impotsPV = parseFloat(document.getElementById('impotsPV').value) / 100;
-
-            // Calculs
-            const montantFraisNotaire = prixAchat * fraisNotaire;
-            const fraisPortage = fraisMensuel * dureePortage;
-            const investissementTotal = prixAchat + montantFraisNotaire + travaux + fraisPortage + autresFrais;
-
-            const montantFraisAgenceVente = prixVente * fraisAgenceVente;
-            const prixVenteNet = prixVente - montantFraisAgenceVente;
-
-            const plusValueBrute = prixVenteNet - investissementTotal;
-            const montantImpots = plusValueBrute > 0 ? plusValueBrute * impotsPV : 0;
-            const beneficeNet = plusValueBrute - montantImpots;
-            const rentabilite = (beneficeNet / investissementTotal) * 100;
-
-            // Affichage des résultats
-            document.getElementById('investissementTotal').textContent = formatEuro(investissementTotal);
-            document.getElementById('prixVenteNet').textContent = formatEuro(prixVenteNet);
-            document.getElementById('plusValueBrute').textContent = formatEuro(plusValueBrute);
-            document.getElementById('montantImpots').textContent = formatEuro(montantImpots);
-            document.getElementById('beneficeNet').textContent = formatEuro(beneficeNet);
-            document.getElementById('rentabilite').textContent = formatPercent(rentabilite);
-
-            // Indicateur de profit
-            const indicator = document.getElementById('profitIndicator');
-            if (beneficeNet > 0) {
-                if (rentabilite > 15) {
-                    indicator.className = 'profit-indicator profit-positive';
-                    indicator.textContent = '✅ Excellente opération ! Rentabilité très attractive.';
-                } else if (rentabilite > 8) {
-                    indicator.className = 'profit-indicator profit-positive';
-                    indicator.textContent = '✅ Bonne opération. Rentabilité intéressante.';
-                } else {
-                    indicator.className = 'profit-indicator profit-warning';
-                    indicator.textContent = '⚠️ Opération rentable mais rentabilité faible.';
-                }
-            } else {
-                indicator.className = 'profit-indicator profit-negative';
-                indicator.textContent = '❌ Attention ! Cette opération génère une perte.';
+        const annonces = [
+            {
+                id: "annonce-001",
+                typeBien: "Maison",
+                titre: "Maison bourgeoise de 210 m² avec parc arboré",
+                adresse: "12 rue des Tilleuls, 33000 Bordeaux",
+                departement: "Gironde",
+                commune: "Bordeaux",
+                superficie: 210,
+                terrain: 980,
+                miseAPrix: 520000,
+                occupation: "Occupée par le propriétaire",
+                avocat: "Me Sophie Durand (Barreau de Bordeaux)",
+                tribunal: "TJ de Bordeaux",
+                dateAudience: "2024-07-12",
+                publication: "Sud Ouest",
+                numeroAnnonce: "2024/4587",
+                lienAnnonce: "https://example.com/annonces/maison-bordeaux",
+                precisions: "Maison en pierre avec dépendance, quartier Caudéran.",
+                comparablesLeboncoin: [
+                    {
+                        titre: "Maison 200 m² Caudéran",
+                        prix: 735000,
+                        url: "https://www.leboncoin.fr/ventes_immobilieres/maison-cauderan",
+                        note: "Bien libre récemment rénové, même quartier."
+                    },
+                    {
+                        titre: "Demeure familiale Bordeaux centre",
+                        prix: 690000,
+                        url: "https://www.leboncoin.fr/ventes_immobilieres/demeure-bordeaux-centre",
+                        note: "Cour intérieure, surface similaire."
+                    }
+                ]
+            },
+            {
+                id: "annonce-002",
+                typeBien: "Villa",
+                titre: "Villa d'architecte vue océan",
+                adresse: "5 allée des Embruns, 64600 Anglet",
+                departement: "Pyrénées-Atlantiques",
+                commune: "Anglet",
+                superficie: 185,
+                terrain: 620,
+                miseAPrix: 750000,
+                occupation: "Occupée par le propriétaire",
+                avocat: "Me Lucas Bernard (Barreau de Bayonne)",
+                tribunal: "TJ de Bayonne",
+                dateAudience: "2024-08-02",
+                publication: "Sud Ouest",
+                numeroAnnonce: "2024/4821",
+                lienAnnonce: "https://example.com/annonces/villa-anglet",
+                precisions: "Piscine chauffée, garage double.",
+                comparablesLeboncoin: [
+                    {
+                        titre: "Villa contemporaine Anglet",
+                        prix: 990000,
+                        url: "https://www.leboncoin.fr/ventes_immobilieres/villa-anglet",
+                        note: "Architecture moderne, prestations supérieures."
+                    }
+                ]
+            },
+            {
+                id: "annonce-003",
+                typeBien: "Domaine",
+                titre: "Domaine viticole avec chai",
+                adresse: "Lieu-dit Les Vignes, 33350 Saint-Émilion",
+                departement: "Gironde",
+                commune: "Saint-Émilion",
+                superficie: 320,
+                terrain: 43000,
+                miseAPrix: 890000,
+                occupation: "Occupée par le propriétaire",
+                avocat: "Me Clara Michel (Barreau de Libourne)",
+                tribunal: "TJ de Libourne",
+                dateAudience: "2024-09-18",
+                publication: "La Vie Judiciaire",
+                numeroAnnonce: "2024/5120",
+                lienAnnonce: "https://example.com/annonces/domaine-saint-emilion",
+                precisions: "Exploitation en AOC avec matériel cédé.",
+                comparablesLeboncoin: [
+                    {
+                        titre: "Propriété viticole 25 ha",
+                        prix: 1150000,
+                        url: "https://www.leboncoin.fr/ventes_immobilieres/propriete-viticole",
+                        note: "Production équivalente, nécessite travaux."
+                    },
+                    {
+                        titre: "Château viticole Saint-Émilion",
+                        prix: 1320000,
+                        url: "https://www.leboncoin.fr/ventes_immobilieres/chateau-viticole",
+                        note: "Prestations haut de gamme."
+                    }
+                ]
+            },
+            {
+                id: "annonce-004",
+                typeBien: "Immeuble",
+                titre: "Immeuble de rapport avec maison principale",
+                adresse: "8 place du Marché, 87000 Limoges",
+                departement: "Haute-Vienne",
+                commune: "Limoges",
+                superficie: 260,
+                terrain: 180,
+                miseAPrix: 310000,
+                occupation: "Occupée par le propriétaire",
+                avocat: "Me Antoine Lopez (Barreau de Limoges)",
+                tribunal: "TJ de Limoges",
+                dateAudience: "2024-07-22",
+                publication: "Annonces Légales 87",
+                numeroAnnonce: "2024/4682",
+                lienAnnonce: "https://example.com/annonces/immeuble-limoges",
+                precisions: "Maison principale + deux locaux commerciaux loués.",
+                comparablesLeboncoin: [
+                    {
+                        titre: "Maison bourgeoise Limoges centre",
+                        prix: 420000,
+                        url: "https://www.leboncoin.fr/ventes_immobilieres/maison-limoges-centre",
+                        note: "Maison libre, même secteur."
+                    }
+                ]
+            },
+            {
+                id: "annonce-005",
+                typeBien: "Maison",
+                titre: "Maison de maître avec parc à Pau",
+                adresse: "27 avenue des Pyrénées, 64000 Pau",
+                departement: "Pyrénées-Atlantiques",
+                commune: "Pau",
+                superficie: 240,
+                terrain: 1500,
+                miseAPrix: 610000,
+                occupation: "Occupée par le propriétaire",
+                avocat: "Me Hélène Caron (Barreau de Pau)",
+                tribunal: "TJ de Pau",
+                dateAudience: "2024-10-04",
+                publication: "Sud Ouest",
+                numeroAnnonce: "2024/5197",
+                lienAnnonce: "https://example.com/annonces/maison-pau",
+                precisions: "Ornementations art déco, dépendances.",
+                comparablesLeboncoin: [
+                    {
+                        titre: "Maison bourgeoise Pau Trespoey",
+                        prix: 785000,
+                        url: "https://www.leboncoin.fr/ventes_immobilieres/maison-pau-trespoey",
+                        note: "Bien libre, prestations comparables."
+                    }
+                ]
             }
-        }
+        ];
 
-        // Mise à jour des affichages des sliders
-        function updateSliderDisplay(sliderId, valueId, formatter) {
-            const slider = document.getElementById(sliderId);
-            const valueDisplay = document.getElementById(valueId);
-            
-            slider.addEventListener('input', function() {
-                let value = this.value;
-                if (formatter === 'euro') {
-                    valueDisplay.textContent = formatEuro(value);
-                } else if (formatter === 'percent') {
-                    valueDisplay.textContent = parseFloat(value).toFixed(1) + ' %';
-                } else if (formatter === 'mois') {
-                    valueDisplay.textContent = value + ' mois';
-                } else if (formatter === 'euroMois') {
-                    valueDisplay.textContent = formatEuro(value) + '/mois';
-                }
-                calculate();
+        const filtreDepartement = document.getElementById("filtreDepartement");
+        const filtreType = document.getElementById("filtreType");
+        const filtreTribunal = document.getElementById("filtreTribunal");
+        const filtreRecherche = document.getElementById("filtreRecherche");
+        const filtreDate = document.getElementById("filtreDate");
+        const resultats = document.getElementById("resultats");
+        const compteur = document.getElementById("compteur");
+        const miseAJour = document.getElementById("miseAJour");
+
+        const todayISO = new Date().toISOString().slice(0, 10);
+        filtreDate.value = todayISO;
+        filtreDate.min = todayISO;
+        miseAJour.textContent = `Dernière actualisation : ${new Date().toLocaleDateString("fr-FR")}`;
+
+        function remplirSelect(select, options) {
+            options.sort().forEach(option => {
+                const opt = document.createElement("option");
+                opt.value = option;
+                opt.textContent = option;
+                select.appendChild(opt);
             });
         }
 
-        // Initialisation des événements
-        updateSliderDisplay('prixAchat', 'prixAchatValue', 'euro');
-        updateSliderDisplay('fraisNotaire', 'fraisNotaireValue', 'percent');
-        updateSliderDisplay('travaux', 'travauxValue', 'euro');
-        updateSliderDisplay('dureePortage', 'dureePortageValue', 'mois');
-        updateSliderDisplay('fraisMensuel', 'fraisMensuelValue', 'euroMois');
-        updateSliderDisplay('autresFrais', 'autresFraisValue', 'euro');
-        updateSliderDisplay('prixVente', 'prixVenteValue', 'euro');
-        updateSliderDisplay('fraisAgenceVente', 'fraisAgenceVenteValue', 'percent');
-        updateSliderDisplay('impotsPV', 'impotsPVValue', 'percent');
+        const departements = Array.from(new Set(annonces.map(a => a.departement))).filter(Boolean);
+        const tribunaux = Array.from(new Set(annonces.map(a => a.tribunal))).filter(Boolean);
+        remplirSelect(filtreDepartement, departements);
+        remplirSelect(filtreTribunal, tribunaux);
 
-        // Calcul initial
-        calculate();
+        function texteAnnonce(annonce) {
+            return [
+                annonce.titre,
+                annonce.adresse,
+                annonce.departement,
+                annonce.commune,
+                annonce.avocat,
+                annonce.tribunal,
+                annonce.numeroAnnonce,
+                annonce.precisions
+            ].join(" ").toLowerCase();
+        }
+
+        function formatPrix(valeur) {
+            return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(valeur);
+        }
+
+        function formatSurface(m2) {
+            return m2 ? `${m2} m²` : "Non précisé";
+        }
+
+        function formatTerrain(m2) {
+            if (!m2) return "Non précisé";
+            const hectares = m2 >= 10000 ? `${(m2 / 10000).toFixed(2)} ha` : null;
+            return hectares ? `${m2} m² (${hectares})` : `${m2} m²`;
+        }
+
+        function genererCarte(annonce) {
+            const article = document.createElement("article");
+
+            const cardHeader = document.createElement("header");
+            const title = document.createElement("h2");
+            title.textContent = annonce.titre;
+            const dateAudience = document.createElement("div");
+            dateAudience.className = "audience-date";
+            dateAudience.textContent = `Audience du ${new Date(annonce.dateAudience).toLocaleDateString("fr-FR", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}`;
+            const localisation = document.createElement("div");
+            localisation.className = "location";
+            localisation.textContent = `${annonce.commune} • ${annonce.departement}`;
+
+            const tags = document.createElement("div");
+            tags.className = "tag-row";
+            [annonce.typeBien, annonce.publication, annonce.numeroAnnonce].forEach(val => {
+                const tag = document.createElement("span");
+                tag.className = "tag";
+                tag.textContent = val;
+                tags.appendChild(tag);
+            });
+
+            cardHeader.append(title, dateAudience, localisation, tags);
+
+            const detailsGrid = document.createElement("div");
+            detailsGrid.className = "grid";
+            const info = [
+                { label: "Adresse", valeur: annonce.adresse },
+                { label: "Superficie habitable", valeur: formatSurface(annonce.superficie) },
+                { label: "Terrain", valeur: formatTerrain(annonce.terrain) },
+                { label: "Mise à prix", valeur: formatPrix(annonce.miseAPrix) },
+                { label: "Occupation", valeur: annonce.occupation },
+                { label: "Avocat poursuivant", valeur: annonce.avocat },
+                { label: "Tribunal", valeur: annonce.tribunal },
+                { label: "Annonce légale", valeur: annonce.lienAnnonce ? `\n                        <a href="${annonce.lienAnnonce}" target="_blank" rel="noopener">Consulter</a>` : "—" },
+                { label: "Précisions", valeur: annonce.precisions || "—" }
+            ];
+
+            info.forEach(item => {
+                const bloc = document.createElement("div");
+                const label = document.createElement("strong");
+                label.textContent = item.label;
+                const value = document.createElement("span");
+                if (item.label === "Annonce légale" && annonce.lienAnnonce) {
+                    const link = document.createElement("a");
+                    link.href = annonce.lienAnnonce;
+                    link.target = "_blank";
+                    link.rel = "noopener";
+                    link.textContent = "Consulter";
+                    value.appendChild(link);
+                } else {
+                    value.textContent = item.valeur;
+                }
+                bloc.append(label, value);
+                detailsGrid.appendChild(bloc);
+            });
+
+            const comparables = document.createElement("div");
+            comparables.className = "comparables";
+            const comparablesTitre = document.createElement("h3");
+            comparablesTitre.textContent = "Comparaison Leboncoin";
+            const liste = document.createElement("ul");
+            if (!annonce.comparablesLeboncoin || annonce.comparablesLeboncoin.length === 0) {
+                const item = document.createElement("li");
+                item.textContent = "Aucun comparable identifié.";
+                liste.appendChild(item);
+            } else {
+                annonce.comparablesLeboncoin.forEach(comparable => {
+                    const item = document.createElement("li");
+                    const lien = document.createElement("a");
+                    lien.href = comparable.url;
+                    lien.target = "_blank";
+                    lien.rel = "noopener";
+                    lien.textContent = comparable.titre;
+                    const texte = document.createElement("span");
+                    texte.textContent = ` — ${formatPrix(comparable.prix)} (${comparable.note})`;
+                    item.append(lien, texte);
+                    liste.appendChild(item);
+                });
+            }
+            comparables.append(comparablesTitre, liste);
+
+            article.append(cardHeader, detailsGrid, comparables);
+            return article;
+        }
+
+        function filtrerAnnonces() {
+            const recherche = filtreRecherche.value.trim().toLowerCase();
+            const dateMin = filtreDate.value || todayISO;
+
+            const resultat = annonces
+                .filter(annonce => annonce.dateAudience >= dateMin)
+                .filter(annonce => annonce.occupation.toLowerCase().includes("occup"))
+                .filter(annonce => !["Appartement", "Loft", "Local"]
+                    .includes(annonce.typeBien))
+                .filter(annonce => {
+                    if (filtreDepartement.value) {
+                        return annonce.departement === filtreDepartement.value;
+                    }
+                    return true;
+                })
+                .filter(annonce => {
+                    if (filtreType.value) {
+                        return annonce.typeBien === filtreType.value;
+                    }
+                    return true;
+                })
+                .filter(annonce => {
+                    if (filtreTribunal.value) {
+                        return annonce.tribunal === filtreTribunal.value;
+                    }
+                    return true;
+                })
+                .filter(annonce => {
+                    if (!recherche) return true;
+                    return texteAnnonce(annonce).includes(recherche);
+                })
+                .sort((a, b) => a.dateAudience.localeCompare(b.dateAudience));
+
+            resultats.innerHTML = "";
+            compteur.textContent = `${resultat.length} ${resultat.length > 1 ? "résultats" : "résultat"}`;
+
+            if (resultat.length === 0) {
+                const vide = document.createElement("div");
+                vide.className = "empty-state";
+                vide.textContent = "Aucune audience future ne correspond à vos critères.";
+                resultats.appendChild(vide);
+                return;
+            }
+
+            resultat.forEach(annonce => resultats.appendChild(genererCarte(annonce)));
+        }
+
+        filtreDepartement.addEventListener("change", filtrerAnnonces);
+        filtreType.addEventListener("change", filtrerAnnonces);
+        filtreTribunal.addEventListener("change", filtrerAnnonces);
+        filtreRecherche.addEventListener("input", () => {
+            window.clearTimeout(filtreRecherche._timer);
+            filtreRecherche._timer = window.setTimeout(filtrerAnnonces, 200);
+        });
+        filtreDate.addEventListener("change", filtrerAnnonces);
+
+        filtrerAnnonces();
     </script>
 </body>
 </html>
