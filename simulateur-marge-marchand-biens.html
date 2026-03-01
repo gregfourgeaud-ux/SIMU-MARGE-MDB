@@ -200,6 +200,134 @@
             letter-spacing: 0.05em;
         }
 
+        /* ── Simulateur de marge ── */
+        .simu {
+            border: 1px solid #222;
+            background: #121212;
+            padding: 28px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .simu h2 {
+            font-size: 1rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            margin: 0;
+            color: #f7f7f7;
+        }
+
+        .simu-grid {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+
+        .simu-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .simu-label {
+            font-size: 0.78rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #888;
+        }
+
+        .simu-value {
+            font-size: 1.15rem;
+            letter-spacing: 0.04em;
+            color: #f7f7f7;
+            font-variant-numeric: tabular-nums;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 2px;
+            background: #2a2a2a;
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #f7f7f7;
+            cursor: pointer;
+            border-radius: 0;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            background: #f7f7f7;
+            cursor: pointer;
+            border-radius: 0;
+            border: none;
+        }
+
+        .simu-result {
+            border-top: 1px solid #1f1f1f;
+            padding-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .simu-kpi {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .simu-kpi-label {
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #666;
+        }
+
+        .simu-kpi-val {
+            font-size: 1.6rem;
+            letter-spacing: 0.02em;
+            font-variant-numeric: tabular-nums;
+            color: #f7f7f7;
+        }
+
+        .simu-kpi-val.pos { color: #6ee7a0; }
+        .simu-kpi-val.neg { color: #f7f7f7; opacity: 0.35; }
+
+        .simu-bar-wrap {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .simu-bar-track {
+            height: 4px;
+            background: #1e1e1e;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .simu-bar-fill {
+            height: 100%;
+            background: #6ee7a0;
+            transition: width 0.15s;
+        }
+
+        .simu-bar-fill.neg {
+            background: #2a2a2a;
+        }
+
         @media (max-width: 640px) {
             body {
                 padding: 16px;
@@ -208,11 +336,63 @@
             .app {
                 padding: 20px;
             }
+
+            .simu {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="app">
+        <section class="simu" aria-label="Simulateur de marge">
+            <h2>Simulateur de marge — Marchand de bien</h2>
+
+            <div class="simu-grid">
+                <div class="simu-field">
+                    <span class="simu-label">Prix d'achat</span>
+                    <span class="simu-value" id="val-achat">200 000 €</span>
+                    <input type="range" id="sl-achat" min="10000" max="1500000" step="5000" value="200000">
+                </div>
+                <div class="simu-field">
+                    <span class="simu-label">Travaux</span>
+                    <span class="simu-value" id="val-travaux">50 000 €</span>
+                    <input type="range" id="sl-travaux" min="0" max="500000" step="2500" value="50000">
+                </div>
+                <div class="simu-field">
+                    <span class="simu-label">Frais (notaire, agence, portage…)</span>
+                    <span class="simu-value" id="val-frais">25 000 €</span>
+                    <input type="range" id="sl-frais" min="0" max="200000" step="1000" value="25000">
+                </div>
+                <div class="simu-field">
+                    <span class="simu-label">Prix de revente</span>
+                    <span class="simu-value" id="val-revente">350 000 €</span>
+                    <input type="range" id="sl-revente" min="10000" max="2000000" step="5000" value="350000">
+                </div>
+            </div>
+
+            <div class="simu-result">
+                <div class="simu-kpi">
+                    <span class="simu-kpi-label">Coût de revient</span>
+                    <span class="simu-kpi-val" id="kpi-cout">275 000 €</span>
+                </div>
+                <div class="simu-kpi">
+                    <span class="simu-kpi-label">Marge brute</span>
+                    <span class="simu-kpi-val pos" id="kpi-marge">75 000 €</span>
+                </div>
+                <div class="simu-kpi">
+                    <span class="simu-kpi-label">Taux de marge</span>
+                    <span class="simu-kpi-val pos" id="kpi-taux">27,3 %</span>
+                </div>
+                <div class="simu-bar-wrap">
+                    <span class="simu-kpi-label" id="bar-label">Marge sur revente</span>
+                    <div class="simu-bar-track">
+                        <div class="simu-bar-fill" id="simu-bar" style="width: 21%"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <header>
             <h1>Veille Enchères Maisons — Nouvelle-Aquitaine</h1>
             <p>Interface minimaliste pour recenser les maisons, domaines, villas ou immeubles occupés par leurs propriétaires et annoncés en ventes aux enchères judiciaires sur l'ensemble de la Nouvelle-Aquitaine. Les audiences passées sont automatiquement écartées et chaque fiche est rapprochée d'annonces comparables repérées sur Leboncoin.</p>
@@ -260,6 +440,51 @@
     </div>
 
     <script>
+        /* ── Simulateur de marge ── */
+        (function () {
+            const fmt = v => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(v);
+            const fmtPct = v => v.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " %";
+
+            const slAchat   = document.getElementById("sl-achat");
+            const slTravaux = document.getElementById("sl-travaux");
+            const slFrais   = document.getElementById("sl-frais");
+            const slRevente = document.getElementById("sl-revente");
+
+            function update() {
+                const achat   = +slAchat.value;
+                const travaux = +slTravaux.value;
+                const frais   = +slFrais.value;
+                const revente = +slRevente.value;
+                const cout    = achat + travaux + frais;
+                const marge   = revente - cout;
+                const taux    = revente > 0 ? (marge / revente) * 100 : 0;
+                const barPct  = Math.max(0, Math.min(100, taux));
+                const pos     = marge >= 0;
+
+                document.getElementById("val-achat").textContent   = fmt(achat);
+                document.getElementById("val-travaux").textContent = fmt(travaux);
+                document.getElementById("val-frais").textContent   = fmt(frais);
+                document.getElementById("val-revente").textContent = fmt(revente);
+
+                document.getElementById("kpi-cout").textContent  = fmt(cout);
+                document.getElementById("kpi-marge").textContent = fmt(marge);
+                document.getElementById("kpi-taux").textContent  = fmtPct(taux);
+
+                const margeEl = document.getElementById("kpi-marge");
+                const tauxEl  = document.getElementById("kpi-taux");
+                margeEl.className = "simu-kpi-val " + (pos ? "pos" : "neg");
+                tauxEl.className  = "simu-kpi-val " + (pos ? "pos" : "neg");
+
+                const bar = document.getElementById("simu-bar");
+                bar.style.width = barPct + "%";
+                bar.className   = "simu-bar-fill" + (pos ? "" : " neg");
+            }
+
+            [slAchat, slTravaux, slFrais, slRevente].forEach(sl => sl.addEventListener("input", update));
+            update();
+        })();
+
+        /* ── Veille enchères ── */
         const annonces = [
             {
                 id: "annonce-001",
