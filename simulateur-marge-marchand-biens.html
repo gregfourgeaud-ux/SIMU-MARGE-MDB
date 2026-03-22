@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Veille des ventes aux enchères - Nouvelle-Aquitaine</title>
+    <title>Labyrinthe Gyro</title>
     <style>
         :root {
-            color-scheme: only dark;
-            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+            color-scheme: light dark;
+            font-family: "Inter", system-ui, -apple-system, sans-serif;
         }
 
         * {
@@ -16,598 +16,268 @@
 
         body {
             margin: 0;
-            background: #0d0d0d;
-            color: #f7f7f7;
             min-height: 100vh;
+            background: radial-gradient(circle at 20% 20%, #222, #0f0f0f 50%),
+                        radial-gradient(circle at 80% 80%, #1a1a1a, #050505 40%);
+            color: #f1f1f1;
             display: flex;
             justify-content: center;
-            padding: 24px;
+            align-items: center;
+            padding: 18px;
         }
 
-        .app {
-            width: min(1080px, 100%);
-            border: 1px solid #222;
-            background: #111;
-            padding: 32px;
-            display: flex;
-            flex-direction: column;
-            gap: 32px;
+        .card {
+            width: min(980px, 100%);
+            background: rgba(12, 12, 12, 0.82);
+            border: 1px solid #262626;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+            display: grid;
+            gap: 18px;
         }
 
         header {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
-        header h1 {
+        h1 {
+            margin: 0;
             font-size: clamp(1.8rem, 2.8vw, 2.4rem);
             letter-spacing: 0.08em;
             text-transform: uppercase;
         }
 
-        header p {
-            max-width: 760px;
-            line-height: 1.5;
-            color: #d8d8d8;
-        }
-
-        .filters {
-            display: grid;
-            gap: 18px;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            padding: 20px;
-            border: 1px solid #1f1f1f;
-            background: #151515;
-        }
-
-        label {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            font-size: 0.9rem;
-            color: #bdbdbd;
-            letter-spacing: 0.05em;
-        }
-
-        input, select {
-            background: #0b0b0b;
-            border: 1px solid #292929;
-            padding: 10px;
-            color: #f6f6f6;
-            font-size: 0.95rem;
-            letter-spacing: 0.03em;
-        }
-
-        input:focus, select:focus {
-            outline: 2px solid #f6f6f6;
-            outline-offset: 0;
-        }
-
-        .results-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
-            color: #cfcfcf;
-            letter-spacing: 0.04em;
-        }
-
-        .results-meta span {
-            white-space: nowrap;
-        }
-
-        .cards {
-            display: grid;
-            gap: 18px;
-        }
-
-        article {
-            border: 1px solid #222;
-            background: #121212;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
-
-        article header {
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .audience-date {
-            font-size: 1.1rem;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-        }
-
-        .location {
-            font-size: 0.95rem;
-            color: #bcbcbc;
-            letter-spacing: 0.04em;
-        }
-
-        .tag-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .tag {
-            border: 1px solid #f6f6f6;
-            color: #f6f6f6;
-            padding: 4px 10px;
-            font-size: 0.7rem;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-        }
-
-        .grid {
-            display: grid;
-            gap: 10px;
-            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-        }
-
-        .grid strong {
-            letter-spacing: 0.04em;
-            font-size: 0.8rem;
-            color: #b6b6b6;
-        }
-
-        .grid span {
-            font-size: 0.95rem;
-            color: #f7f7f7;
-            letter-spacing: 0.02em;
-        }
-
-        .comparables {
-            border-top: 1px solid #1f1f1f;
-            padding-top: 16px;
-            display: grid;
-            gap: 10px;
-        }
-
-        .comparables h3 {
-            letter-spacing: 0.08em;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-        }
-
-        .comparables ul {
-            list-style: none;
-            padding: 0;
+        p {
             margin: 0;
-            display: grid;
-            gap: 8px;
+            color: #c9c9c9;
+            line-height: 1.6;
         }
 
-        .comparables li {
-            font-size: 0.9rem;
-            color: #dcdcdc;
-        }
-
-        a {
-            color: inherit;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 48px 24px;
+        canvas {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
             border: 1px solid #1f1f1f;
-            background: #141414;
-            letter-spacing: 0.05em;
+            background: #0b0b0b;
         }
 
-        @media (max-width: 640px) {
-            body {
-                padding: 16px;
-            }
+        .hud {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
 
-            .app {
-                padding: 20px;
-            }
+        .pill {
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid #2c2c2c;
+            background: #141414;
+            color: #e9e9e9;
+            font-size: 0.95rem;
+            letter-spacing: 0.04em;
+        }
+
+        button {
+            appearance: none;
+            border: 1px solid #f5f5f5;
+            background: transparent;
+            color: #f5f5f5;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+            transition: transform 120ms ease, border-color 120ms ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            border-color: #65ffb4;
+        }
+
+        .mini-note {
+            color: #9a9a9a;
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
-    <div class="app">
+    <main class="card">
         <header>
-            <h1>Veille Enchères Maisons — Nouvelle-Aquitaine</h1>
-            <p>Interface minimaliste pour recenser les maisons, domaines, villas ou immeubles occupés par leurs propriétaires et annoncés en ventes aux enchères judiciaires sur l'ensemble de la Nouvelle-Aquitaine. Les audiences passées sont automatiquement écartées et chaque fiche est rapprochée d'annonces comparables repérées sur Leboncoin.</p>
+            <h1>Labyrinthe à la Bille</h1>
+            <p>Inclinez votre téléphone pour guider la bille vers la zone d'arrivée. Sur ordinateur, utilisez les flèches du clavier. Le rendu est volontairement minimaliste pour se concentrer sur la sensation de gravité.</p>
         </header>
 
-        <section class="filters">
-            <label>
-                Département
-                <select id="filtreDepartement">
-                    <option value="">Tous</option>
-                </select>
-            </label>
-            <label>
-                Type de bien
-                <select id="filtreType">
-                    <option value="">Tous</option>
-                    <option value="Maison">Maison</option>
-                    <option value="Villa">Villa</option>
-                    <option value="Domaine">Domaine</option>
-                    <option value="Immeuble">Immeuble</option>
-                </select>
-            </label>
-            <label>
-                Tribunal
-                <select id="filtreTribunal">
-                    <option value="">Tous</option>
-                </select>
-            </label>
-            <label>
-                Mots-clés (ville, avocat…)
-                <input id="filtreRecherche" type="search" placeholder="Rechercher">
-            </label>
-            <label>
-                Audience à partir du
-                <input id="filtreDate" type="date">
-            </label>
-        </section>
+        <canvas id="scene" width="900" height="540" aria-label="Labyrinthe minimaliste"></canvas>
 
-        <div class="results-meta">
-            <span id="compteur">0 résultats</span>
-            <span id="miseAJour"></span>
+        <div class="hud">
+            <span class="pill" id="status">Attente des capteurs…</span>
+            <button id="reset">Recommencer</button>
+            <span class="mini-note">Si le gyroscope est bloqué, autorisez son usage dans votre navigateur.</span>
         </div>
-
-        <section id="resultats" class="cards" aria-live="polite"></section>
-    </div>
+    </main>
 
     <script>
-        const annonces = [
-            {
-                id: "annonce-001",
-                typeBien: "Maison",
-                titre: "Maison bourgeoise de 210 m² avec parc arboré",
-                adresse: "12 rue des Tilleuls, 33000 Bordeaux",
-                departement: "Gironde",
-                commune: "Bordeaux",
-                superficie: 210,
-                terrain: 980,
-                miseAPrix: 520000,
-                occupation: "Occupée par le propriétaire",
-                avocat: "Me Sophie Durand (Barreau de Bordeaux)",
-                tribunal: "TJ de Bordeaux",
-                dateAudience: "2024-07-12",
-                publication: "Sud Ouest",
-                numeroAnnonce: "2024/4587",
-                lienAnnonce: "https://example.com/annonces/maison-bordeaux",
-                precisions: "Maison en pierre avec dépendance, quartier Caudéran.",
-                comparablesLeboncoin: [
-                    {
-                        titre: "Maison 200 m² Caudéran",
-                        prix: 735000,
-                        url: "https://www.leboncoin.fr/ventes_immobilieres/maison-cauderan",
-                        note: "Bien libre récemment rénové, même quartier."
-                    },
-                    {
-                        titre: "Demeure familiale Bordeaux centre",
-                        prix: 690000,
-                        url: "https://www.leboncoin.fr/ventes_immobilieres/demeure-bordeaux-centre",
-                        note: "Cour intérieure, surface similaire."
-                    }
-                ]
-            },
-            {
-                id: "annonce-002",
-                typeBien: "Villa",
-                titre: "Villa d'architecte vue océan",
-                adresse: "5 allée des Embruns, 64600 Anglet",
-                departement: "Pyrénées-Atlantiques",
-                commune: "Anglet",
-                superficie: 185,
-                terrain: 620,
-                miseAPrix: 750000,
-                occupation: "Occupée par le propriétaire",
-                avocat: "Me Lucas Bernard (Barreau de Bayonne)",
-                tribunal: "TJ de Bayonne",
-                dateAudience: "2024-08-02",
-                publication: "Sud Ouest",
-                numeroAnnonce: "2024/4821",
-                lienAnnonce: "https://example.com/annonces/villa-anglet",
-                precisions: "Piscine chauffée, garage double.",
-                comparablesLeboncoin: [
-                    {
-                        titre: "Villa contemporaine Anglet",
-                        prix: 990000,
-                        url: "https://www.leboncoin.fr/ventes_immobilieres/villa-anglet",
-                        note: "Architecture moderne, prestations supérieures."
-                    }
-                ]
-            },
-            {
-                id: "annonce-003",
-                typeBien: "Domaine",
-                titre: "Domaine viticole avec chai",
-                adresse: "Lieu-dit Les Vignes, 33350 Saint-Émilion",
-                departement: "Gironde",
-                commune: "Saint-Émilion",
-                superficie: 320,
-                terrain: 43000,
-                miseAPrix: 890000,
-                occupation: "Occupée par le propriétaire",
-                avocat: "Me Clara Michel (Barreau de Libourne)",
-                tribunal: "TJ de Libourne",
-                dateAudience: "2024-09-18",
-                publication: "La Vie Judiciaire",
-                numeroAnnonce: "2024/5120",
-                lienAnnonce: "https://example.com/annonces/domaine-saint-emilion",
-                precisions: "Exploitation en AOC avec matériel cédé.",
-                comparablesLeboncoin: [
-                    {
-                        titre: "Propriété viticole 25 ha",
-                        prix: 1150000,
-                        url: "https://www.leboncoin.fr/ventes_immobilieres/propriete-viticole",
-                        note: "Production équivalente, nécessite travaux."
-                    },
-                    {
-                        titre: "Château viticole Saint-Émilion",
-                        prix: 1320000,
-                        url: "https://www.leboncoin.fr/ventes_immobilieres/chateau-viticole",
-                        note: "Prestations haut de gamme."
-                    }
-                ]
-            },
-            {
-                id: "annonce-004",
-                typeBien: "Immeuble",
-                titre: "Immeuble de rapport avec maison principale",
-                adresse: "8 place du Marché, 87000 Limoges",
-                departement: "Haute-Vienne",
-                commune: "Limoges",
-                superficie: 260,
-                terrain: 180,
-                miseAPrix: 310000,
-                occupation: "Occupée par le propriétaire",
-                avocat: "Me Antoine Lopez (Barreau de Limoges)",
-                tribunal: "TJ de Limoges",
-                dateAudience: "2024-07-22",
-                publication: "Annonces Légales 87",
-                numeroAnnonce: "2024/4682",
-                lienAnnonce: "https://example.com/annonces/immeuble-limoges",
-                precisions: "Maison principale + deux locaux commerciaux loués.",
-                comparablesLeboncoin: [
-                    {
-                        titre: "Maison bourgeoise Limoges centre",
-                        prix: 420000,
-                        url: "https://www.leboncoin.fr/ventes_immobilieres/maison-limoges-centre",
-                        note: "Maison libre, même secteur."
-                    }
-                ]
-            },
-            {
-                id: "annonce-005",
-                typeBien: "Maison",
-                titre: "Maison de maître avec parc à Pau",
-                adresse: "27 avenue des Pyrénées, 64000 Pau",
-                departement: "Pyrénées-Atlantiques",
-                commune: "Pau",
-                superficie: 240,
-                terrain: 1500,
-                miseAPrix: 610000,
-                occupation: "Occupée par le propriétaire",
-                avocat: "Me Hélène Caron (Barreau de Pau)",
-                tribunal: "TJ de Pau",
-                dateAudience: "2024-10-04",
-                publication: "Sud Ouest",
-                numeroAnnonce: "2024/5197",
-                lienAnnonce: "https://example.com/annonces/maison-pau",
-                precisions: "Ornementations art déco, dépendances.",
-                comparablesLeboncoin: [
-                    {
-                        titre: "Maison bourgeoise Pau Trespoey",
-                        prix: 785000,
-                        url: "https://www.leboncoin.fr/ventes_immobilieres/maison-pau-trespoey",
-                        note: "Bien libre, prestations comparables."
-                    }
-                ]
-            }
+        const canvas = document.getElementById("scene");
+        const ctx = canvas.getContext("2d");
+        const statusEl = document.getElementById("status");
+        const resetBtn = document.getElementById("reset");
+
+        const cell = 60;
+        const maze = [
+            "###############",
+            "#S   #       E#",
+            "# ### ### ### ##",
+            "#   #   #     ##",
+            "### # ### ###  #",
+            "#   #     #    #",
+            "# ### ### # ####",
+            "#     #   #    #",
+            "##### # ###### #",
+            "#     #        #",
+            "############### #"
         ];
 
-        const filtreDepartement = document.getElementById("filtreDepartement");
-        const filtreType = document.getElementById("filtreType");
-        const filtreTribunal = document.getElementById("filtreTribunal");
-        const filtreRecherche = document.getElementById("filtreRecherche");
-        const filtreDate = document.getElementById("filtreDate");
-        const resultats = document.getElementById("resultats");
-        const compteur = document.getElementById("compteur");
-        const miseAJour = document.getElementById("miseAJour");
+        const goalColor = "#65ffb4";
+        const wallColor = "#2d2d2d";
+        const ballColor = "#f5f5f5";
+        const ballRadius = cell * 0.28;
+        const speed = 0.055;
+        const friction = 0.985;
 
-        const todayISO = new Date().toISOString().slice(0, 10);
-        filtreDate.value = todayISO;
-        filtreDate.min = todayISO;
-        miseAJour.textContent = `Dernière actualisation : ${new Date().toLocaleDateString("fr-FR")}`;
+        let ball, velocity, orientationReady = false;
 
-        function remplirSelect(select, options) {
-            options.sort().forEach(option => {
-                const opt = document.createElement("option");
-                opt.value = option;
-                opt.textContent = option;
-                select.appendChild(opt);
-            });
-        }
-
-        const departements = Array.from(new Set(annonces.map(a => a.departement))).filter(Boolean);
-        const tribunaux = Array.from(new Set(annonces.map(a => a.tribunal))).filter(Boolean);
-        remplirSelect(filtreDepartement, departements);
-        remplirSelect(filtreTribunal, tribunaux);
-
-        function texteAnnonce(annonce) {
-            return [
-                annonce.titre,
-                annonce.adresse,
-                annonce.departement,
-                annonce.commune,
-                annonce.avocat,
-                annonce.tribunal,
-                annonce.numeroAnnonce,
-                annonce.precisions
-            ].join(" ").toLowerCase();
-        }
-
-        function formatPrix(valeur) {
-            return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(valeur);
-        }
-
-        function formatSurface(m2) {
-            return m2 ? `${m2} m²` : "Non précisé";
-        }
-
-        function formatTerrain(m2) {
-            if (!m2) return "Non précisé";
-            const hectares = m2 >= 10000 ? `${(m2 / 10000).toFixed(2)} ha` : null;
-            return hectares ? `${m2} m² (${hectares})` : `${m2} m²`;
-        }
-
-        function genererCarte(annonce) {
-            const article = document.createElement("article");
-
-            const cardHeader = document.createElement("header");
-            const title = document.createElement("h2");
-            title.textContent = annonce.titre;
-            const dateAudience = document.createElement("div");
-            dateAudience.className = "audience-date";
-            dateAudience.textContent = `Audience du ${new Date(annonce.dateAudience).toLocaleDateString("fr-FR", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}`;
-            const localisation = document.createElement("div");
-            localisation.className = "location";
-            localisation.textContent = `${annonce.commune} • ${annonce.departement}`;
-
-            const tags = document.createElement("div");
-            tags.className = "tag-row";
-            [annonce.typeBien, annonce.publication, annonce.numeroAnnonce].forEach(val => {
-                const tag = document.createElement("span");
-                tag.className = "tag";
-                tag.textContent = val;
-                tags.appendChild(tag);
-            });
-
-            cardHeader.append(title, dateAudience, localisation, tags);
-
-            const detailsGrid = document.createElement("div");
-            detailsGrid.className = "grid";
-            const info = [
-                { label: "Adresse", valeur: annonce.adresse },
-                { label: "Superficie habitable", valeur: formatSurface(annonce.superficie) },
-                { label: "Terrain", valeur: formatTerrain(annonce.terrain) },
-                { label: "Mise à prix", valeur: formatPrix(annonce.miseAPrix) },
-                { label: "Occupation", valeur: annonce.occupation },
-                { label: "Avocat poursuivant", valeur: annonce.avocat },
-                { label: "Tribunal", valeur: annonce.tribunal },
-                { label: "Annonce légale", valeur: annonce.lienAnnonce ? `\n                        <a href="${annonce.lienAnnonce}" target="_blank" rel="noopener">Consulter</a>` : "—" },
-                { label: "Précisions", valeur: annonce.precisions || "—" }
-            ];
-
-            info.forEach(item => {
-                const bloc = document.createElement("div");
-                const label = document.createElement("strong");
-                label.textContent = item.label;
-                const value = document.createElement("span");
-                if (item.label === "Annonce légale" && annonce.lienAnnonce) {
-                    const link = document.createElement("a");
-                    link.href = annonce.lienAnnonce;
-                    link.target = "_blank";
-                    link.rel = "noopener";
-                    link.textContent = "Consulter";
-                    value.appendChild(link);
-                } else {
-                    value.textContent = item.valeur;
+        function findStart() {
+            for (let y = 0; y < maze.length; y++) {
+                const x = maze[y].indexOf("S");
+                if (x !== -1) {
+                    return { x: x * cell + cell / 2, y: y * cell + cell / 2 };
                 }
-                bloc.append(label, value);
-                detailsGrid.appendChild(bloc);
-            });
+            }
+            return { x: cell + cell / 2, y: cell + cell / 2 };
+        }
 
-            const comparables = document.createElement("div");
-            comparables.className = "comparables";
-            const comparablesTitre = document.createElement("h3");
-            comparablesTitre.textContent = "Comparaison Leboncoin";
-            const liste = document.createElement("ul");
-            if (!annonce.comparablesLeboncoin || annonce.comparablesLeboncoin.length === 0) {
-                const item = document.createElement("li");
-                item.textContent = "Aucun comparable identifié.";
-                liste.appendChild(item);
+        function resetGame() {
+            ball = findStart();
+            velocity = { x: 0, y: 0 };
+            statusEl.textContent = orientationReady ? "Inclinez pour déplacer la bille" : "Contrôlez avec les flèches";
+        }
+
+        function drawMaze() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let y = 0; y < maze.length; y++) {
+                for (let x = 0; x < maze[y].length; x++) {
+                    const symbol = maze[y][x];
+                    const px = x * cell;
+                    const py = y * cell;
+                    if (symbol === "#") {
+                        ctx.fillStyle = wallColor;
+                        ctx.fillRect(px, py, cell, cell);
+                    } else if (symbol === "E") {
+                        ctx.fillStyle = goalColor;
+                        ctx.fillRect(px + 8, py + 8, cell - 16, cell - 16);
+                    }
+                }
+            }
+        }
+
+        function drawBall() {
+            ctx.fillStyle = ballColor;
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function getCell(x, y) {
+            const cx = Math.floor(x / cell);
+            const cy = Math.floor(y / cell);
+            if (cy < 0 || cy >= maze.length || cx < 0 || cx >= maze[cy].length) return "#";
+            return maze[cy][cx];
+        }
+
+        function collide(nextX, nextY) {
+            const points = [
+                { x: nextX + ballRadius, y: nextY },
+                { x: nextX - ballRadius, y: nextY },
+                { x: nextX, y: nextY + ballRadius },
+                { x: nextX, y: nextY - ballRadius }
+            ];
+            return points.some(p => getCell(p.x, p.y) === "#");
+        }
+
+        function updatePosition(ax, ay) {
+            velocity.x = (velocity.x + ax) * friction;
+            velocity.y = (velocity.y + ay) * friction;
+
+            const nextX = ball.x + velocity.x;
+            const nextY = ball.y + velocity.y;
+
+            if (!collide(nextX, ball.y)) ball.x = nextX; else velocity.x = 0;
+            if (!collide(ball.x, nextY)) ball.y = nextY; else velocity.y = 0;
+        }
+
+        function checkGoal() {
+            if (getCell(ball.x, ball.y) === "E") {
+                statusEl.textContent = "Gagné ! Tapotez pour recommencer.";
+                velocity = { x: 0, y: 0 };
+            }
+        }
+
+        function loop() {
+            drawMaze();
+            drawBall();
+            checkGoal();
+            requestAnimationFrame(loop);
+        }
+
+        const controls = { ax: 0, ay: 0 };
+
+        function handleOrientation(event) {
+            orientationReady = true;
+            statusEl.textContent = "Inclinez pour déplacer la bille";
+            const gamma = event.gamma || 0; // gauche/droite
+            const beta = event.beta || 0; // avant/arrière
+            controls.ax = gamma * speed;
+            controls.ay = beta * speed;
+        }
+
+        async function requestPermissionIfNeeded() {
+            if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+                try {
+                    const res = await DeviceOrientationEvent.requestPermission();
+                    if (res === "granted") {
+                        window.addEventListener("deviceorientation", handleOrientation, true);
+                    } else {
+                        statusEl.textContent = "Permission refusée, utilisez les flèches.";
+                    }
+                } catch (err) {
+                    statusEl.textContent = "Capteur indisponible, utilisez les flèches.";
+                }
             } else {
-                annonce.comparablesLeboncoin.forEach(comparable => {
-                    const item = document.createElement("li");
-                    const lien = document.createElement("a");
-                    lien.href = comparable.url;
-                    lien.target = "_blank";
-                    lien.rel = "noopener";
-                    lien.textContent = comparable.titre;
-                    const texte = document.createElement("span");
-                    texte.textContent = ` — ${formatPrix(comparable.prix)} (${comparable.note})`;
-                    item.append(lien, texte);
-                    liste.appendChild(item);
-                });
+                window.addEventListener("deviceorientation", handleOrientation, true);
             }
-            comparables.append(comparablesTitre, liste);
-
-            article.append(cardHeader, detailsGrid, comparables);
-            return article;
         }
 
-        function filtrerAnnonces() {
-            const recherche = filtreRecherche.value.trim().toLowerCase();
-            const dateMin = filtreDate.value || todayISO;
-
-            const resultat = annonces
-                .filter(annonce => annonce.dateAudience >= dateMin)
-                .filter(annonce => annonce.occupation.toLowerCase().includes("occup"))
-                .filter(annonce => !["Appartement", "Loft", "Local"]
-                    .includes(annonce.typeBien))
-                .filter(annonce => {
-                    if (filtreDepartement.value) {
-                        return annonce.departement === filtreDepartement.value;
-                    }
-                    return true;
-                })
-                .filter(annonce => {
-                    if (filtreType.value) {
-                        return annonce.typeBien === filtreType.value;
-                    }
-                    return true;
-                })
-                .filter(annonce => {
-                    if (filtreTribunal.value) {
-                        return annonce.tribunal === filtreTribunal.value;
-                    }
-                    return true;
-                })
-                .filter(annonce => {
-                    if (!recherche) return true;
-                    return texteAnnonce(annonce).includes(recherche);
-                })
-                .sort((a, b) => a.dateAudience.localeCompare(b.dateAudience));
-
-            resultats.innerHTML = "";
-            compteur.textContent = `${resultat.length} ${resultat.length > 1 ? "résultats" : "résultat"}`;
-
-            if (resultat.length === 0) {
-                const vide = document.createElement("div");
-                vide.className = "empty-state";
-                vide.textContent = "Aucune audience future ne correspond à vos critères.";
-                resultats.appendChild(vide);
-                return;
-            }
-
-            resultat.forEach(annonce => resultats.appendChild(genererCarte(annonce)));
-        }
-
-        filtreDepartement.addEventListener("change", filtrerAnnonces);
-        filtreType.addEventListener("change", filtrerAnnonces);
-        filtreTribunal.addEventListener("change", filtrerAnnonces);
-        filtreRecherche.addEventListener("input", () => {
-            window.clearTimeout(filtreRecherche._timer);
-            filtreRecherche._timer = window.setTimeout(filtrerAnnonces, 200);
+        window.addEventListener("keydown", (event) => {
+            const step = 0.8;
+            if (event.key === "ArrowLeft") controls.ax = -step;
+            if (event.key === "ArrowRight") controls.ax = step;
+            if (event.key === "ArrowUp") controls.ay = -step;
+            if (event.key === "ArrowDown") controls.ay = step;
         });
-        filtreDate.addEventListener("change", filtrerAnnonces);
 
-        filtrerAnnonces();
+        resetBtn.addEventListener("click", resetGame);
+        canvas.addEventListener("click", () => { if (getCell(ball.x, ball.y) === "E") resetGame(); });
+
+        resetGame();
+        requestPermissionIfNeeded();
+
+        setInterval(() => updatePosition(controls.ax, controls.ay), 16);
+        loop();
     </script>
 </body>
 </html>
