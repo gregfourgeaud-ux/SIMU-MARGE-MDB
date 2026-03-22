@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Street Fighter II</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Courier New', monospace;
+    user-select: none;
+    overflow: hidden;
+  }
+  h1 {
+    color: #FFD700;
+    text-shadow: 3px 3px 0 #FF4500, 6px 6px 0 #8B0000;
+    font-size: 2rem;
+    letter-spacing: 4px;
+    margin-bottom: 8px;
+  }
+  #gameContainer {
+    position: relative;
+    width: 800px;
+  }
+  #hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+  }
+  .player-hud {
+    width: 45%;
+  }
+  .player-name {
+    color: #FFD700;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+  .p2-hud .player-name { text-align: right; }
+  .health-bar-bg {
+    height: 20px;
+    background: #300;
+    border: 2px solid #FFD700;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .p1-hud .health-bar { background: linear-gradient(90deg, #00FF00, #AAFF00); float: left; height: 100%; transition: width 0.1s; }
+  .p2-hud .health-bar { background: linear-gradient(90deg, #AAFF00, #00FF00); float: right; height: 100%; transition: width 0.1s; }
+  #timer {
+    color: #FFD700;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    min-width: 50px;
+  }
+  #canvas {
+    display: block;
+    border: 3px solid #FFD700;
+    box-shadow: 0 0 30px #FFD700aa, inset 0 0 30px #00000088;
+  }
+  #controls {
+    color: #888;
+    font-size: 0.65rem;
+    margin-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 4px;
+  }
+  .ctrl-block { line-height: 1.6; }
+  .ctrl-block span { color: #FFD700; }
+  #message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #FFD700;
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-shadow: 3px 3px 0 #000;
+    text-align: center;
+    pointer-events: none;
+    letter-spacing: 4px;
+    z-index: 10;
+    display: none;
+  }
+</style>
+</head>
+<body>
+<h1>⚡ STREET FIGHTER II ⚡</h1>
+<div id="gameContainer">
+  <div id="hud">
+    <div class="player-hud p1-hud">
+      <div class="player-name">RYU</div>
+      <div class="health-bar-bg"><div class="health-bar" id="p1Health" style="width:100%"></div></div>
+    </div>
+    <div id="timer">99</div>
+    <div class="player-hud p2-hud">
+      <div class="player-name" style="text-align:right">KEN</div>
+      <div class="health-bar-bg"><div class="health-bar" id="p2Health" style="width:100%"></div></div>
+    </div>
+  </div>
+  <canvas id="canvas" width="800" height="400"></canvas>
+  <div id="message"></div>
+  <div id="controls">
+    <div class="ctrl-block">
+      <span>RYU :</span><br>
+      Déplacer : <span>A / D</span><br>
+      Sauter : <span>W</span><br>
+      Baisser : <span>S</span><br>
+      Poing : <span>G</span> &nbsp; Coup de pied : <span>H</span><br>
+      Hadouken : <span>↓ + G</span>
+    </div>
+    <div class="ctrl-block" style="text-align:right">
+      <span>KEN :</span><br>
+      Déplacer : <span>← / →</span><br>
+      Sauter : <span>↑</span><br>
+      Baisser : <span>↓</span><br>
+      Poing : <span>1</span> &nbsp; Coup de pied : <span>2</span><br>
+      Shoryuken : <span>↑ + 1</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+const FLOOR = H - 80;
+const GRAVITY = 0.6;
+
+// ─── COLOURS ────────────────────────────────────────────────────────────────
+const COLORS = {
+  ryu:  { skin:'#F4A460', gi:'#FFFFFF', belt:'#CC0000', hair:'#1a1a1a', shoes:'#222' },
+  ken:  { skin:'#F4A460', gi:'#FF3300', belt:'#FFD700', hair:'#D4A017', shoes:'#333' }
+};
+
+// ─── FIREBALL ───────────────────────────────────────────────────────────────
+class Fireball {
+  constructor(x, y, dir, color) {
+    this.x = x; this.y = y; this.dir = dir;
+    this.color = color;
+    this.w = 28; this.h = 16;
+    this.speed = 7;
+    this.active = true;
+    this.frame = 0;
+  }
+  update() {
+    this.x += this.speed * this.dir;
+    this.frame++;
+    if (this.x < -50 || this.x > W + 50) this.active = false;
+  }
+  draw() {
+    const cx = this.x, cy = this.y;
+    const f = Math.sin(this.frame * 0.4);
+    // Outer glow
+    ctx.save();
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 18;
+    // Core
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, this.w/2 + f*2, this.h/2, 0, 0, Math.PI*2);
+    ctx.fillStyle = '#FFF';
+    ctx.fill();
+    // Shell
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, this.w/2, this.h/2 - 2, 0, 0, Math.PI*2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+    // Swirl lines
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.arc(cx - 4 + i*4, cy + f*2, 4, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+  getHitBox() { return { x: this.x - this.w/2, y: this.y - this.h/2, w: this.w, h: this.h }; }
+}
+
+// ─── FIGHTER ─────────────────────────────────────────────────────────────────
+class Fighter {
+  constructor(x, isP2, colors, name) {
+    this.x = x; this.y = FLOOR;
+    this.vx = 0; this.vy = 0;
+    this.isP2 = isP2;
+    this.colors = colors;
+    this.name = name;
+    this.hp = 100;
+    this.maxHp = 100;
+    this.w = 40; this.h = 80;
+    this.onGround = true;
+    this.facing = isP2 ? -1 : 1; // 1=right, -1=left
+    this.state = 'idle'; // idle, walk, jump, crouch, punch, kick, fireball, hurt, dead
+    this.stateTimer = 0;
+    this.hitCooldown = 0;
+    this.special = false;
+    this.wins = 0;
+    // Input flags
+    this.keys = {};
+    // Animation frame
+    this.animFrame = 0;
+    this.animTimer = 0;
+    // Combo input buffer
+    this.inputBuffer = [];
+    this.inputTimer = 0;
+  }
+
+  get cx() { return this.x; }
+  get top() { return this.y - this.h; }
+  get feet() { return this.y; }
+
+  applyGravity() {
+    if (!this.onGround) {
+      this.vy += GRAVITY;
+      this.y += this.vy;
+      if (this.y >= FLOOR) {
+        this.y = FLOOR;
+        this.vy = 0;
+        this.vx = 0;
+        this.onGround = true;
+        if (this.state === 'jump') this.state = 'idle';
+      }
+    }
+  }
+
+  move(dx) {
+    if (this.isActing()) return;
+    this.x += dx;
+    this.x = Math.max(this.w/2 + 10, Math.min(W - this.w/2 - 10, this.x));
+    if (dx !== 0 && this.onGround) this.state = 'walk';
+    else if (this.onGround && this.state === 'walk') this.state = 'idle';
+  }
+
+  jump() {
+    if (!this.onGround || this.isActing()) return;
+    this.vy = -14;
+    this.vx = 0;
+    this.onGround = false;
+    this.state = 'jump';
+    this.stateTimer = 0;
+  }
+
+  crouch() {
+    if (this.onGround && !this.isActing()) this.state = 'crouch';
+  }
+
+  isActing() {
+    return ['punch','kick','fireball','hurt','dead'].includes(this.state);
+  }
+
+  punch() {
+    if (this.isActing() && this.state !== 'jump') return;
+    this.state = 'punch';
+    this.stateTimer = 18;
+    this.special = false;
+  }
+
+  kick() {
+    if (this.isActing() && this.state !== 'jump') return;
+    this.state = 'kick';
+    this.stateTimer = 20;
+    this.special = false;
+  }
+
+  fireSpecial() {
+    if (this.isActing()) return false;
+    this.state = 'fireball';
+    this.stateTimer = 30;
+    this.special = true;
+    return true;
+  }
+
+  getAttackBox() {
+    if (this.state !== 'punch' && this.state !== 'kick') return null;
+    if (this.stateTimer > (this.state === 'punch' ? 10 : 12)) return null;
+    const reach = this.state === 'punch' ? 50 : 60;
+    const yOff = this.state === 'kick' ? -20 : -40;
+    return {
+      x: this.facing > 0 ? this.x + this.w/2 - 10 : this.x - this.w/2 - reach + 10,
+      y: this.y + yOff - 20,
+      w: reach, h: 24
+    };
+  }
+
+  getBodyBox() {
+    const crouching = this.state === 'crouch';
+    return {
+      x: this.x - this.w/2,
+      y: this.y - (crouching ? this.h/2 : this.h),
+      w: this.w,
+      h: crouching ? this.h/2 : this.h
+    };
+  }
+
+  takeDamage(dmg) {
+    if (this.hitCooldown > 0 || this.state === 'dead') return;
+    this.hp = Math.max(0, this.hp - dmg);
+    this.state = this.hp === 0 ? 'dead' : 'hurt';
+    this.stateTimer = this.hp === 0 ? 999 : 20;
+    this.hitCooldown = 25;
+  }
+
+  update(opponent, fireballs) {
+    this.animTimer++;
+    if (this.animTimer > 8) { this.animTimer = 0; this.animFrame++; }
+    if (this.hitCooldown > 0) this.hitCooldown--;
+    if (this.stateTimer > 0) {
+      this.stateTimer--;
+      if (this.stateTimer === 0 && this.state !== 'dead') {
+        this.state = this.onGround ? 'idle' : 'jump';
+      }
+    }
+    this.applyGravity();
+
+    // Auto-face opponent
+    if (!this.isActing() || this.state === 'walk') {
+      this.facing = opponent.x > this.x ? 1 : -1;
+    }
+
+    // Check if own attack hits opponent
+    const atk = this.getAttackBox();
+    if (atk) {
+      const oBody = opponent.getBodyBox();
+      if (rectsOverlap(atk, oBody)) {
+        const dmg = this.state === 'kick' ? 10 : 7;
+        opponent.takeDamage(dmg);
+      }
+    }
+
+    // Check fireball hits
+    for (const fb of fireballs) {
+      if (!fb.active) continue;
+      const fbBox = fb.getHitBox();
+      const myBody = this.getBodyBox();
+      if (fb.owner !== this && rectsOverlap(fbBox, myBody)) {
+        this.takeDamage(12);
+        fb.active = false;
+      }
+    }
+  }
+
+  // ── DRAWING ───────────────────────────────────────────────────────────────
+  draw() {
+    const c = this.colors;
+    const f = this.facing;
+    const bx = this.x, by = this.y;
+    const af = this.animFrame % 4;
+    const crouching = this.state === 'crouch';
+    const dead = this.state === 'dead';
+    const hurt = this.state === 'hurt';
+    const jumping = !this.onGround;
+    const punching = this.state === 'punch';
+    const kicking  = this.state === 'kick';
+    const doFireball = this.state === 'fireball';
+
+    ctx.save();
+    // Flash when hurt
+    if (hurt && this.animFrame % 2 === 0) {
+      ctx.globalAlpha = 0.4;
+    }
+    ctx.translate(bx, by);
+    ctx.scale(f, 1);
+
+    const legSpread = crouching ? 12 : (walking(this) ? 10 * Math.sin(this.animFrame * 0.5) : 0);
+    const bodyY = crouching ? -35 : (jumping ? -75 + Math.abs(this.vy) : dead ? -20 : -70);
+    const bodyH = crouching ? 30 : 34;
+    const headY = crouching ? bodyY - 24 : bodyY - 20;
+
+    // ── Shadow
+    ctx.beginPath();
+    ctx.ellipse(0, -2, 22, 6, 0, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.fill();
+
+    // ── Legs
+    if (!dead) {
+      // Left leg
+      ctx.beginPath();
+      ctx.roundRect(-10 - (crouching?8:legSpread), crouching ? -28 : bodyY + bodyH, 14, crouching ? 28 : 40, 4);
+      ctx.fillStyle = c.gi;
+      ctx.fill();
+      // Right leg
+      ctx.beginPath();
+      ctx.roundRect(2 + (crouching?8:legSpread), crouching ? -28 : bodyY + bodyH, 14, crouching ? 28 : 40, 4);
+      ctx.fillStyle = c.gi;
+      ctx.fill();
+      // Shoes
+      ctx.fillStyle = c.shoes;
+      ctx.beginPath();
+      ctx.roundRect(-12 - (crouching?8:legSpread), crouching ? -6 : bodyY + bodyH + 32, 16, 10, 3);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.roundRect(1 + (crouching?8:legSpread), crouching ? -6 : bodyY + bodyH + 32, 16, 10, 3);
+      ctx.fill();
+    } else {
+      // Dead – lying on ground
+      ctx.fillStyle = c.gi;
+      ctx.beginPath();
+      ctx.roundRect(-30, -12, 60, 18, 5);
+      ctx.fill();
+    }
+
+    // ── Body (gi top)
+    ctx.beginPath();
+    ctx.roundRect(-16, bodyY, 32, bodyH, 5);
+    ctx.fillStyle = c.gi;
+    ctx.fill();
+
+    // ── Belt
+    ctx.beginPath();
+    ctx.rect(-16, bodyY + bodyH - 8, 32, 8);
+    ctx.fillStyle = c.belt;
+    ctx.fill();
+
+    // ── Arms
+    if (!dead) {
+      const armY = bodyY + 4;
+      if (punching) {
+        // Punching arm extended
+        ctx.beginPath();
+        ctx.roundRect(14, armY, 38, 11, 4);
+        ctx.fillStyle = c.skin;
+        ctx.fill();
+        // Fist
+        ctx.beginPath();
+        ctx.roundRect(48, armY - 3, 14, 16, 4);
+        ctx.fillStyle = c.skin;
+        ctx.fill();
+        // Back arm
+        ctx.beginPath();
+        ctx.roundRect(-26, armY, 16, 11, 4);
+        ctx.fillStyle = c.skin;
+        ctx.fill();
+      } else if (doFireball) {
+        // Arms extended forward
+        ctx.beginPath();
+        ctx.roundRect(14, armY + 2, 40, 10, 4);
+        ctx.fillStyle = c.skin;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.roundRect(14, armY + 14, 38, 10, 4);
+        ctx.fillStyle = c.skin;
+        ctx.fill();
+      } else {
+        // Idle/walk arms swing
+        const swing = Math.sin(this.animFrame * 0.5) * 4;
+        ctx.beginPath();
+        ctx.roundRect(14, armY + (crouching ? 5 : swing), 12, crouching ? 8 : 28, 4);
+        ctx.fillStyle = c.skin;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.roundRect(-26, armY + (crouching ? 5 : -swing), 12, crouching ? 8 : 28, 4);
+        ctx.fillStyle = c.skin;
+        ctx.fill();
+      }
+    }
+
+    // ── Kicking leg
+    if (kicking && !dead) {
+      ctx.beginPath();
+      ctx.roundRect(10, bodyY + bodyH + 4, 48, 12, 4);
+      ctx.fillStyle = c.gi;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.roundRect(54, bodyY + bodyH, 14, 18, 4);
+      ctx.fillStyle = c.shoes;
+      ctx.fill();
+    }
+
+    // ── Head
+    if (!dead) {
+      ctx.beginPath();
+      ctx.ellipse(0, headY, 14, 16, 0, 0, Math.PI*2);
+      ctx.fillStyle = c.skin;
+      ctx.fill();
+      // Eyes
+      ctx.beginPath();
+      ctx.ellipse(5, headY - 2, 3, 3, 0, 0, Math.PI*2);
+      ctx.fillStyle = '#222';
+      ctx.fill();
+      // Hair / headband
+      if (this.name === 'RYU') {
+        // Ryu headband
+        ctx.beginPath();
+        ctx.rect(-14, headY - 8, 28, 5);
+        ctx.fillStyle = '#CC0000';
+        ctx.fill();
+        // Hair
+        ctx.beginPath();
+        ctx.arc(0, headY - 10, 13, Math.PI, 0);
+        ctx.fillStyle = c.hair;
+        ctx.fill();
+      } else {
+        // Ken hair
+        ctx.beginPath();
+        ctx.arc(0, headY - 8, 13, Math.PI * 1.1, 0);
+        ctx.fillStyle = c.hair;
+        ctx.fill();
+        // Shine
+        ctx.beginPath();
+        ctx.arc(-3, headY - 14, 5, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(255,220,100,0.5)';
+        ctx.fill();
+      }
+    } else {
+      // Dead head on ground
+      ctx.beginPath();
+      ctx.ellipse(20, -20, 14, 12, 0.3, 0, Math.PI*2);
+      ctx.fillStyle = c.skin;
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
+}
+
+function walking(f) { return f.state === 'walk'; }
+
+function rectsOverlap(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x &&
+         a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+// ─── GAME STATE ─────────────────────────────────────────────────────────────
+let p1, p2, fireballs, gameTime, gameState, roundWinner, roundDelay, messageEl;
+let keys = {};
+
+function initRound() {
+  p1 = new Fighter(180, false, COLORS.ryu, 'RYU');
+  p2 = new Fighter(620,  true, COLORS.ken, 'KEN');
+  fireballs = [];
+  gameTime = 99;
+  gameState = 'playing';
+  roundWinner = null;
+  roundDelay = 0;
+  updateHUD();
+  hideMessage();
+}
+
+function showMessage(text, sub) {
+  messageEl.innerHTML = text + (sub ? `<br><span style="font-size:1rem;letter-spacing:2px">${sub}</span>` : '');
+  messageEl.style.display = 'block';
+}
+function hideMessage() {
+  messageEl.style.display = 'none';
+}
+
+// ─── INPUT ──────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (!keys[e.code]) {
+    keys[e.code] = true;
+    handleKeyDown(e.code);
+  }
+  // Prevent page scroll on arrow keys/space
+  if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
+});
+document.addEventListener('keyup', e => { keys[e.code] = false; });
+
+function handleKeyDown(code) {
+  if (gameState === 'gameover') { initRound(); return; }
+  if (gameState !== 'playing') return;
+
+  // P1 actions
+  if (code === 'KeyW') p1.jump();
+  if (code === 'KeyG') {
+    if (keys['KeyS']) {
+      // Hadouken special
+      if (p1.fireSpecial()) spawnFireball(p1);
+    } else { p1.punch(); }
+  }
+  if (code === 'KeyH') p1.kick();
+
+  // P2 actions
+  if (code === 'ArrowUp') {
+    if (keys['Digit1']) {
+      if (p2.fireSpecial()) spawnFireball(p2);
+    } else { p2.jump(); }
+  }
+  if (code === 'Digit1') {
+    if (keys['ArrowUp']) {
+      if (p2.fireSpecial()) spawnFireball(p2);
+    } else { p2.punch(); }
+  }
+  if (code === 'Digit2') p2.kick();
+}
+
+function spawnFireball(owner) {
+  const fb = new Fireball(
+    owner.x + owner.facing * 30,
+    owner.y - 45,
+    owner.facing,
+    owner.name === 'RYU' ? '#4488FF' : '#FF6600'
+  );
+  fb.owner = owner;
+  fireballs.push(fb);
+}
+
+// ─── HUD ────────────────────────────────────────────────────────────────────
+let timerInterval;
+function startTimer() {
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    if (gameState !== 'playing') return;
+    gameTime--;
+    document.getElementById('timer').textContent = gameTime;
+    if (gameTime <= 0) endRound('time');
+  }, 1000);
+}
+
+function updateHUD() {
+  document.getElementById('p1Health').style.width = (p1.hp / p1.maxHp * 100) + '%';
+  document.getElementById('p2Health').style.width = (p2.hp / p2.maxHp * 100) + '%';
+}
+
+function endRound(reason) {
+  if (gameState !== 'playing') return;
+  gameState = 'roundover';
+  clearInterval(timerInterval);
+  if (reason === 'time') {
+    if (p1.hp > p2.hp) roundWinner = 'P1';
+    else if (p2.hp > p1.hp) roundWinner = 'P2';
+    else roundWinner = 'draw';
+  } else {
+    roundWinner = reason;
+  }
+
+  setTimeout(() => {
+    if (roundWinner === 'P1') showMessage('KO !', 'RYU GAGNE !');
+    else if (roundWinner === 'P2') showMessage('KO !', 'KEN GAGNE !');
+    else showMessage('ÉGALITÉ !');
+    gameState = 'gameover';
+  }, 600);
+}
+
+// ─── BACKGROUND ─────────────────────────────────────────────────────────────
+function drawBackground() {
+  // Sky gradient
+  const sky = ctx.createLinearGradient(0, 0, 0, FLOOR);
+  sky.addColorStop(0, '#0a0a2e');
+  sky.addColorStop(0.6, '#1a1a4e');
+  sky.addColorStop(1, '#2a1a0e');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, FLOOR);
+
+  // Moon
+  ctx.beginPath();
+  ctx.arc(680, 60, 35, 0, Math.PI*2);
+  ctx.fillStyle = '#FFFACD';
+  ctx.shadowColor = '#FFFACD';
+  ctx.shadowBlur = 30;
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // Stars
+  ctx.fillStyle = '#FFF';
+  const starPositions = [[40,30],[120,55],[200,20],[300,45],[450,15],[550,60],[650,35],[750,20],[80,80],[380,70]];
+  for (const [sx,sy] of starPositions) {
+    ctx.beginPath();
+    ctx.arc(sx, sy, 1.5, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // Temple structure background
+  ctx.fillStyle = '#1a0a00';
+  ctx.fillRect(150, 150, 500, FLOOR - 150);
+  // Columns
+  for (let i = 0; i < 5; i++) {
+    ctx.fillStyle = '#2a1500';
+    ctx.fillRect(150 + i * 120, 170, 30, FLOOR - 170);
+  }
+  // Roof line
+  ctx.fillStyle = '#3a2000';
+  ctx.fillRect(120, 145, 560, 20);
+  ctx.fillRect(100, 135, 600, 14);
+
+  // Lanterns
+  for (let i = 0; i < 4; i++) {
+    const lx = 210 + i * 130;
+    const flicker = 0.8 + 0.2 * Math.sin(Date.now() * 0.005 + i);
+    ctx.fillStyle = `rgba(255, 140, 0, ${flicker})`;
+    ctx.shadowColor = '#FF8C00';
+    ctx.shadowBlur = 20 * flicker;
+    ctx.fillRect(lx - 6, 155, 12, 18);
+    ctx.fillStyle = '#FF4500';
+    ctx.fillRect(lx - 8, 152, 16, 5);
+    ctx.fillRect(lx - 8, 172, 16, 5);
+    ctx.shadowBlur = 0;
+  }
+
+  // Floor
+  const floor = ctx.createLinearGradient(0, FLOOR, 0, H);
+  floor.addColorStop(0, '#4a3000');
+  floor.addColorStop(1, '#2a1800');
+  ctx.fillStyle = floor;
+  ctx.fillRect(0, FLOOR, W, H - FLOOR);
+
+  // Floor line / shadow
+  ctx.fillStyle = '#000000aa';
+  ctx.fillRect(0, FLOOR, W, 4);
+
+  // Floor tiles
+  ctx.strokeStyle = '#5a3800';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < W; i += 80) {
+    ctx.beginPath();
+    ctx.moveTo(i, FLOOR);
+    ctx.lineTo(i, H);
+    ctx.stroke();
+  }
+}
+
+// ─── MAIN LOOP ───────────────────────────────────────────────────────────────
+let lastTime = 0;
+function loop(ts) {
+  const dt = ts - lastTime; lastTime = ts;
+
+  // Input for movement (continuous)
+  if (gameState === 'playing') {
+    if (keys['KeyA']) p1.move(-4);
+    else if (keys['KeyD']) p1.move(4);
+    else if (p1.onGround && p1.state === 'walk') p1.state = 'idle';
+
+    if (keys['KeyS']) { if (p1.onGround && !p1.isActing()) p1.state = 'crouch'; }
+    else if (p1.state === 'crouch') p1.state = 'idle';
+
+    if (keys['ArrowLeft']) p2.move(-4);
+    else if (keys['ArrowRight']) p2.move(4);
+    else if (p2.onGround && p2.state === 'walk') p2.state = 'idle';
+
+    if (keys['ArrowDown']) { if (p2.onGround && !p2.isActing()) p2.state = 'crouch'; }
+    else if (p2.state === 'crouch') p2.state = 'idle';
+
+    p1.update(p2, fireballs);
+    p2.update(p1, fireballs);
+
+    // Update fireballs
+    for (const fb of fireballs) fb.update();
+    fireballs = fireballs.filter(fb => fb.active);
+
+    updateHUD();
+
+    // Death check
+    if (p1.hp <= 0 && gameState === 'playing') endRound('P2');
+    if (p2.hp <= 0 && gameState === 'playing') endRound('P1');
+  }
+
+  // Draw
+  ctx.clearRect(0, 0, W, H);
+  drawBackground();
+  for (const fb of fireballs) fb.draw();
+  p1.draw();
+  p2.draw();
+
+  requestAnimationFrame(loop);
+}
+
+// ─── BOOT ────────────────────────────────────────────────────────────────────
+messageEl = document.getElementById('message');
+initRound();
+startTimer();
+showMessage('ROUND 1', 'FIGHT !');
+setTimeout(hideMessage, 2000);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
